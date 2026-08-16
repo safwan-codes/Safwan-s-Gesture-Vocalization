@@ -19,6 +19,7 @@ TempGest/
 *.png
 !template.png
 !icons/*.png
+!images/*.png
 
 # IDE and OS
 .vscode/
