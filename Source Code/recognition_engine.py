@@ -40,8 +40,8 @@ MIN_SEPARATION = 22.0
 
 # A letter is only reported once it holds still: it must win a majority of the
 # recent frames and clear the confidence bar.
-HISTORY_LEN = 7
-MIN_VOTES = 4
+HISTORY_LEN = 9
+MIN_VOTES = 5
 MIN_CONFIDENCE = 0.60
 
 # Custom gestures are silhouettes, so overlap compares them far more reliably
@@ -98,7 +98,7 @@ class RecognitionEngine:
         between the two sides of the split.
         """
         value = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2HSV)[:, :, 2]
-        value = cv2.GaussianBlur(value, (5, 5), 0)
+        value = cv2.GaussianBlur(value, (7, 7), 0)
 
         if manual_threshold is None:
             _, mask = cv2.threshold(value, 0, 255,
@@ -120,17 +120,17 @@ class RecognitionEngine:
 
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self._kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, self._kernel)
-        return self._largest_blob(mask), separation
+        return self._largest_blob_bbox(mask), separation
 
     @staticmethod
-    def _largest_blob(mask):
-        """Drop everything but the biggest white region — the training masks
-        never contain a second object."""
+    def _largest_blob_bbox(mask):
+        """Drop everything but the biggest white region and return it with its bounding box."""
         count, labels, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
         if count <= 1:
-            return mask
+            return mask, (0, 0, mask.shape[1], mask.shape[0])
         biggest = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
-        return np.where(labels == biggest, 255, 0).astype(np.uint8)
+        x, y, w, h, _ = stats[biggest]
+        return np.where(labels == biggest, 255, 0).astype(np.uint8), (x, y, w, h)
 
     # ── Custom gestures ────────────────────────────────────────────────────
 
@@ -223,8 +223,22 @@ class RecognitionEngine:
         height, width = frame.shape[:2]
         x1, y1, x2, y2 = self.roi_box(width, height)
 
-        mask, separation = self._segment(frame[y1:y2, x1:x2], threshold)
-        mask_64 = cv2.resize(mask, (64, 64), interpolation=cv2.INTER_AREA)
+        (mask, bbox), separation = self._segment(frame[y1:y2, x1:x2], threshold)
+        
+        # Center and scale the hand to take up ~65% of the 64x64 frame
+        bx, by, bw, bh = bbox
+        if bw > 0 and bh > 0:
+            cropped = mask[by:by+bh, bx:bx+bw]
+            max_dim = max(bw, bh)
+            pad_size = int(max_dim / 0.65)
+            square = np.zeros((pad_size, pad_size), dtype=np.uint8)
+            off_x = (pad_size - bw) // 2
+            off_y = (pad_size - bh) // 2
+            square[off_y:off_y+bh, off_x:off_x+bw] = cropped
+            mask_64 = cv2.resize(square, (64, 64), interpolation=cv2.INTER_AREA)
+        else:
+            mask_64 = cv2.resize(mask, (64, 64), interpolation=cv2.INTER_AREA)
+
         mask_64 = np.where(mask_64 > 127, 255, 0).astype(np.uint8)
 
         fill = float((mask_64 > 127).mean())
