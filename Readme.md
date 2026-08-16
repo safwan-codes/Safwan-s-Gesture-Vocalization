@@ -168,25 +168,13 @@ pip install opencv-contrib-python==3.4.2.16
 
 ## Demonstrations
 
-* Take a look at the working project demonstration. Click on the image to view the complete video
+### Web Dashboard
+![Web Dashboard](./images/web_dashboard.png)
 
-
-[![Sign Language Recognition Using Hand Gestures](https://i.ytimg.com/vi/vXSTZNEkHlg/maxresdefault.jpg)](https://youtu.be/vXSTZNEkHlg)
+### Desktop Application
+![Desktop Application](./images/desktop_app.png)
 
 
 ## Authors
 
-* **Shadab Shaikh** - *Synopsis preparation, Requirement specification, Detection of object through camera, ASL character generation through hand gestures, Sentence formation, Modelling of project, Exporting content, Custom gesture generation with image processing Using SIFT, Gesture viewer, TTS assistance.*  - [shadabsk](https://github.com/shadabsk)
-
-* **Obaid Kazi** - *Requirement specification, Detection of object through camera, ASL character generation through hand gestures, Sentence formation, Exporting content, Integrating modules into GUI, TTS assistance.'* 	- [ObaidKazi](https://github.com/ObaidKazi)
-
-* **Khan Mohammed Rehan** - *Synopsis preparation, Requirement specification, Sentence formation, Custom gesture generation with image processing Using SIFT*  - [rehannk](https://github.com/rehannk)
-
-* **Mohd Adnan Ansari** - *Requirement specification, Modelling of project, Creating the complete front end of the application* - [mohdadnan0000](https://github.com/mohdadnan0000)
-
-
-## Acknowledgments
-
-* The template of readme.md was taken from [PurpleBooth](https://github.com/PurpleBooth)
-* **Mr. Muhammed Salman Shamsi** *Asst. Prof Kalsekar Technical campus* - For his guidance.
-* **Mr. Rupesh Poudel** [Repo](https://github.com/rrupeshh/Simple-Sign-Language-Detector)- For his assistance and permission to use his existing application. 
+* **Safwan** - *Developer* - [safwan-codes](https://github.com/safwan-codes)
