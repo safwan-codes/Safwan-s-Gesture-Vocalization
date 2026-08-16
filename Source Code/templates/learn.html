@@ -4,78 +4,199 @@
 {% block title %}Learn the alphabet — Gesture Vocalization{% endblock %}
 
 {% block content %}
-<div class="page-head rise">
-    <h1>The ASL alphabet</h1>
-    <p>These are the hand shapes the engine recognizes — one for each letter. Practice a shape, then try it in front of the camera with Scan one letter.</p>
-</div>
+<style>
+    .learn-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .learn-header {
+        margin-bottom: 2rem;
+    }
+    .learn-header h1 {
+        font-size: 2.5rem;
+        color: #FFFFFF;
+        margin-bottom: 0.5rem;
+    }
+    .learn-header p {
+        color: var(--mint);
+    }
+    .gesture-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1.5rem;
+    }
+    .gesture-card {
+        background: var(--forest-deep);
+        border: 1px solid var(--forest-line);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .gesture-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--lime);
+        box-shadow: 0 5px 15px rgba(217, 240, 79, 0.2);
+    }
+    .gesture-letter {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--lime);
+        margin-bottom: 0.5rem;
+    }
+    .gesture-view {
+        font-size: 0.8rem;
+        color: var(--mint);
+    }
+    
+    /* Modal styling */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+    .modal.active {
+        display: flex;
+    }
+    .modal-content {
+        background: var(--forest-deep);
+        padding: 2.5rem;
+        border-radius: 16px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        position: relative;
+        border: 1px solid var(--forest-line);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-sprite {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 1.5rem auto;
+        border-radius: 12px;
+        object-fit: cover;
+        display: block;
+        image-rendering: pixelated;
+        background: #000;
+        border: 1px solid var(--forest-line);
+    }
+    .close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--mint);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .close-btn:hover {
+        color: var(--lime);
+    }
+    .modal h2 {
+        font-size: 2.5rem;
+        color: var(--lime);
+        margin-bottom: 1rem;
+    }
+    .modal p {
+        color: #FFFFFF;
+        line-height: 1.6;
+        font-size: 1.1rem;
+    }
+</style>
 
-{% if gestures %}
-<div class="letter-grid rise">
-    {% for g in gestures %}
-    <figure class="letter-card" style="margin: 0; cursor: pointer;" onclick="openModal('{{ g.letter }}', '{{ g.image }}')">
-        <img src="{{ g.image }}" alt="ASL hand shape for the letter {{ g.letter }}" loading="lazy" style="image-rendering: pixelated; width: 100%;">
-        <figcaption>{{ g.letter }}</figcaption>
-    </figure>
-    {% endfor %}
-</div>
-{% else %}
-<div class="card rise">
-    <div class="empty">
-        <strong>No reference images found</strong>
-        Add letter images to static/images/gestures/ to build this page.
+<div class="learn-container rise">
+    <div class="learn-header">
+        <h1>American Sign Language Library</h1>
+        <p>Click on any letter to see a detailed breakdown of how to perform the gesture.</p>
+    </div>
+    
+    <div class="gesture-grid" id="gestureGrid">
+        <!-- Cards injected by JS -->
+    </div>
+    
+    <div class="learn-header" style="margin-top: 3rem;">
+        <h2>Full Reference Chart</h2>
+        <p>Here is the full template reference used by the model.</p>
+        <img src="{{ url_for('static', filename='images/template.png') }}" alt="ASL Full Chart" style="max-width: 100%; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--border-color);">
     </div>
 </div>
-{% endif %}
 
 <!-- Modal -->
-<div id="gestureModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-    <div style="background: var(--forest-deep); border: 1px solid var(--forest-line); padding: 2rem; border-radius: var(--radius); max-width: 500px; width: 90%; text-align: center; position: relative; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <button onclick="closeModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--mint); font-size: 1.5rem; cursor: pointer;">&times;</button>
-        <img id="modalSprite" src="" alt="Gesture Image" style="width: 140px; height: 140px; margin: 0 auto 1.5rem auto; border-radius: 12px; object-fit: cover; display: block; image-rendering: pixelated; background: #000;">
-        <h2 id="modalTitle" style="color: var(--lime); margin-bottom: 1rem; font-size: 2rem;">A</h2>
-        <p id="modalInstructions" style="color: #ccc; line-height: 1.6;">Instructions will appear here.</p>
+<div class="modal" id="gestureModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+        <img class="modal-sprite" id="modalSprite" src="" alt="Gesture Image">
+        <h2 id="modalTitle">A</h2>
+        <p id="modalInstructions">Detailed instructions on how to form this hand shape will appear here.</p>
     </div>
 </div>
 
 <script>
-    const instructions = {
-        'A': 'Make a fist with your thumb resting against the side of your index finger.',
-        'B': 'Hold all fingers straight up and together, with your thumb folded across your palm.',
-        'C': 'Curve your hand into a "C" shape, with fingers together and thumb curved below.',
-        'D': 'Hold your index finger straight up, curving your other fingers to touch your thumb tip.',
-        'E': 'Fold all four fingers down so their tips touch your palm, with your thumb folded tightly underneath.',
-        'F': 'Touch your index finger to your thumb to form a circle, leaving other fingers extended.',
-        'G': 'Point your index finger and thumb to the side, parallel to each other, like you are holding a small object.',
-        'H': 'Point your index and middle fingers to the side, keeping them together.',
-        'I': 'Hold up your pinky finger while curling the others into a fist.',
-        'J': 'Hold up your pinky finger and swoop it down in a "J" curve.',
-        'K': 'Point your index and middle fingers up in a V shape, with your thumb resting between them.',
-        'L': 'Point your index finger up and thumb to the side, forming an "L" shape.',
-        'M': 'Fold three fingers over your thumb so your thumb peeks out between your ring and pinky fingers.',
-        'N': 'Fold two fingers over your thumb so your thumb peeks out between your middle and ring fingers.',
-        'O': 'Curve all your fingers to touch your thumb tip, forming an "O" shape.',
-        'P': 'Similar to K, but point your hand downwards.',
-        'Q': 'Similar to G, but point your hand downwards.',
-        'R': 'Cross your middle finger over your index finger, keeping the other fingers curled.',
-        'S': 'Make a tight fist with your thumb wrapping over the front of your folded fingers.',
-        'T': 'Fold your fingers into a fist with your thumb tucked between your index and middle fingers.',
-        'U': 'Point your index and middle fingers straight up and kept tightly together.',
-        'V': 'Point your index and middle fingers straight up in a V shape, separated.',
-        'W': 'Hold up your index, middle, and ring fingers separated.',
-        'X': 'Curl your index finger like a hook, keeping the rest of your fingers in a fist.',
-        'Y': 'Extend your thumb and pinky finger outward while curling the other fingers in a fist.',
-        'Z': 'Use your index finger to draw a "Z" in the air.'
-    };
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const grid = document.getElementById('gestureGrid');
+    
+    letters.forEach((letter, index) => {
+        const card = document.createElement('div');
+        card.className = 'gesture-card';
+        card.innerHTML = `
+            <img src="/static/images/gestures/${letter}.jpg" onerror="this.src='/static/images/template.png'" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; margin: 0 auto 0.5rem auto; display: block; image-rendering: pixelated; background: #000;">
+            <div class="gesture-letter">${letter}</div>
+            <div class="gesture-view">View Guide</div>
+        `;
+        card.onclick = () => openModal(letter);
+        grid.appendChild(card);
+    });
 
-    function openModal(letter, imgSrc) {
+    function openModal(letter) {
         document.getElementById('modalTitle').textContent = `Letter ${letter}`;
-        document.getElementById('modalSprite').src = imgSrc;
+        document.getElementById('modalSprite').src = `/static/images/gestures/${letter}.jpg`;
+        document.getElementById('modalSprite').style.imageRendering = 'pixelated';
+        
+        // Map common ASL instructions
+        const instructions = {
+            'A': 'Make a fist with your thumb resting against the side of your index finger.',
+            'B': 'Hold all fingers straight up and together, with your thumb folded across your palm.',
+            'C': 'Curve your hand into a "C" shape, with fingers together and thumb curved below.',
+            'D': 'Hold your index finger straight up, curving your other fingers to touch your thumb tip.',
+            'E': 'Fold all four fingers down so their tips touch your palm, with your thumb folded tightly underneath.',
+            'F': 'Touch your index finger to your thumb to form a circle, leaving other fingers extended.',
+            'G': 'Point your index finger and thumb to the side, parallel to each other, like you are holding a small object.',
+            'H': 'Point your index and middle fingers to the side, keeping them together.',
+            'I': 'Hold up your pinky finger while curling the others into a fist.',
+            'J': 'Hold up your pinky finger and swoop it down in a "J" curve.',
+            'K': 'Point your index and middle fingers up in a V shape, with your thumb resting between them.',
+            'L': 'Point your index finger up and thumb to the side, forming an "L" shape.',
+            'M': 'Fold three fingers over your thumb so your thumb peeks out between your ring and pinky fingers.',
+            'N': 'Fold two fingers over your thumb so your thumb peeks out between your middle and ring fingers.',
+            'O': 'Curve all your fingers to touch your thumb tip, forming an "O" shape.',
+            'P': 'Similar to K, but point your hand downwards.',
+            'Q': 'Similar to G, but point your hand downwards.',
+            'R': 'Cross your middle finger over your index finger, keeping the other fingers curled.',
+            'S': 'Make a tight fist with your thumb wrapping over the front of your folded fingers.',
+            'T': 'Fold your fingers into a fist with your thumb tucked between your index and middle fingers.',
+            'U': 'Point your index and middle fingers straight up and kept tightly together.',
+            'V': 'Point your index and middle fingers straight up in a V shape, separated.',
+            'W': 'Hold up your index, middle, and ring fingers separated.',
+            'X': 'Curl your index finger like a hook, keeping the rest of your fingers in a fist.',
+            'Y': 'Extend your thumb and pinky finger outward while curling the other fingers in a fist.',
+            'Z': 'Use your index finger to draw a "Z" in the air.'
+        };
+
         document.getElementById('modalInstructions').textContent = instructions[letter] || 'Follow the hand shape exactly as shown in the reference image.';
-        document.getElementById('gestureModal').style.display = 'flex';
+        document.getElementById('gestureModal').classList.add('active');
     }
 
     function closeModal() {
-        document.getElementById('gestureModal').style.display = 'none';
+        document.getElementById('gestureModal').classList.remove('active');
     }
 </script>
 {% endblock %}

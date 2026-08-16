@@ -183,21 +183,7 @@ def history():
 @app.route('/learn')
 @login_required
 def learn():
-    gestures = []
-    gestures_dir = os.path.join(app.root_path, 'static', 'images', 'gestures')
-
-    if os.path.exists(gestures_dir):
-        for filename in sorted(os.listdir(gestures_dir)):
-            if filename.endswith(('.png', '.jpg', '.jpeg')):
-                letter = os.path.splitext(filename)[0].upper()
-                if letter.isalpha() and len(letter) == 1:
-                    gestures.append({
-                        'letter': letter,
-                        'image': f'/static/images/gestures/{filename}'
-                    })
-
-    return render_template('learn.html', gestures=gestures,
-                           current_user=session['username'])
+    return render_template('learn.html', current_user=session['username'])
 
 
 @app.route('/tutorial')
