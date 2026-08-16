@@ -175,6 +175,26 @@ pip install opencv-contrib-python==3.4.2.16
 ![Desktop Application](./images/desktop_app.png)
 
 
-## Authors
+## About the Developer
 
-* **Safwan** - *Developer* - [safwan-codes](https://github.com/safwan-codes)
+**Safwan Tai**  
+*DATABASE ENGINEER | PYTHON DEVELOPER | ASP .NET DEVELOPER*  
+
+Backend Developer with hands-on experience in building web applications using ASP.NET Core MVC and designing optimized relational databases using SQL Server and MySQL. Developed real-world systems including a Learning Management System (LMS) and ERP-style applications, focusing on modular architecture, query optimization, and scalable backend design. Strong foundation in data structures, API development, and problem-solving, with a growing interest in database engineering and system performance optimization.
+
+### Contact & Profiles
+* **Email:** safwantai7744@gmail.com
+* **LinkedIn:** [safwan-tai](https://linkedin.com/in/safwan-tai)
+* **GitHub:** [safwan-codes](https://github.com/safwan-codes)
+* **Location:** Surat 395005
+
+### Core Skills
+* **Programming:** C#, SQL, Java, Python, C/C++
+* **Web Technologies:** ASP.NET Core MVC, PHP, JavaScript, HTML / CSS
+* **Database:** SQL Server, MySQL
+* **Backend Concepts:** Object-Oriented Programming (OOP), Database Design & Normalization, MVC Architecture
+* **Tools:** Visual Studio / VS Code, SQL Server Management Studio, WAMP/XAMP Server, Git / GitHub, Jupyter Notebook
+
+### Education
+* **Bachelors of Engineering in Computer Science** (2026) — R.N.G. Patel Institute of Technology
+* **Diploma in Computer Engineering** (2023) — N.G. Patel Polytechnic
